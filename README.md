@@ -1,6 +1,39 @@
 # libgonet
 C++ network library based on `libgo`.
 
+## Benchmark
+
+性能测试步骤(先安装boost1.59+)：
+
+    $ mkdir build -p && cd build
+    $ cmake .. -DENABLE_BOOST_CONTEXT=ON
+    $ make
+    $ sudo make install
+    $ cd ../test/test
+    $ make -j4
+  
+启动服务端：
+
+    $ ./bmserver.t
+  
+启动客户端：
+
+    $ ./bmclient.t
+    
+四核测试：
+
+    $ ./bmserver.t 64 0 160 4
+    $ ./bmclient.t 64 10 1000 0 160 4
+    
+性能指标：
+
+    CPU: Intel(R) Core(TM) i7-4770 CPU @ 3.40GHz
+    64Bytes数据包、Pipeline=1000、10连接做pingpong测试：
+        单核：160w QPS
+        四核：270w QPS
+
+## Demo
+
 ~~~~~~~~~~cpp
 /**************************************************
 * 一个简单的echo server.

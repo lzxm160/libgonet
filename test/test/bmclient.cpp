@@ -3,6 +3,9 @@
 #include <boost/thread.hpp>
 #include <atomic>
 #include <libgonet/network.h>
+#if PROFILE
+#include <gperftools/profiler.h>
+#endif
 using namespace std;
 using namespace co;
 using namespace network;
@@ -45,6 +48,9 @@ void start_client(std::string url)
     c.SetConnectedCb([&](SessionEntry sess){
             ++g_conn;
             sess->SetSocketOptNoDelay(g_nodelay_flag);
+#if PROFILE
+            ProfilerStart("client.prof");
+#endif
             })
         .SetReceiveCb(
             [&](SessionEntry sess, const void* data, size_t bytes)
@@ -78,6 +84,9 @@ void start_client(std::string url)
     c.SetDisconnectedCb([](SessionEntry, boost_ec ec){
 //            printf("client: disconnected!\n");
             --g_conn;
+#if PROFILE
+            ProfilerStop();
+#endif
 //            cout << "disconnect error:" << ec.message() << endl;
             });
     boost_ec ec = c.Connect(url);
@@ -104,7 +113,7 @@ void show_status()
         printf("--------------------------------------------------------------------------------------------------------\n");
         printf("------ start PackageSize=%d Bytes, Conn=%d, Pipeline=%d, NoDelay=%d, RecvBuffer=%d KB, Threads=%d URL=%s -----\n",
                 g_package, conn, pipeline, g_nodelay_flag, recv_buffer_length / 1024, g_thread_count, g_url.c_str());
-        printf(" index |  conn  |   s_send   | s_send_err |   s_recv   |   c_send   | c_send_err |   c_recv   |   QPS   | max_pack | Ops\n");
+        printf(" index |  conn  |   s_send   | s_send_err |   s_recv   |   c_send   | c_send_err |   c_recv   |   OPS   | max_pack | Qps\n");
     }
 
     static unsigned long long last_server_send{0};
